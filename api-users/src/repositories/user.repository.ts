@@ -1,5 +1,4 @@
 import db from '../db';
-import errorHandler from '../middlewares/error-handler.middleware';
 import DatabaseError from '../models/errors/database.error.model';
 import User from '../models/user.model';
 
