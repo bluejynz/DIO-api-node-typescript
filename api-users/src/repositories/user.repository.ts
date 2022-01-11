@@ -28,7 +28,7 @@ class UserRepository {
      * @param uuid recebe uuid para procurar usuário caso exista.
      * @returns o usuário se existir, senão retorna mensagem.
      */
-    async findById(uuid: string) : Promise<User> {
+    async findById(uuid: string) : Promise<User | null> {
         try{
             const query = `
                 SELECT uuid, username
@@ -39,9 +39,9 @@ class UserRepository {
             const values = [ uuid ];
             const { rows } = await db.query<User>(query, values);
             const [ user ] = rows;
-            return user;
+            return user || null;
         } catch(error) {
-            throw new DatabaseError('Erro na consulta por ID', error);
+            throw new DatabaseError('Erro na consulta de usuário por ID', error);
         }
     }
 
@@ -59,7 +59,7 @@ class UserRepository {
             const [ user ] = rows;
             return user || null;
         } catch(error) {
-            throw new DatabaseError('Erro na consulta por username e password', error);
+            throw new DatabaseError('Erro na consulta de usuário por username e password', error);
         }
     }
 
