@@ -15,7 +15,7 @@ authorizationRoute.post('/token', basicAuthenticationMiddleware, async (req: Req
         if(!user)
             throw new ForbiddenError('Usuário não informado');
         
-        const jwt = JWT.sign({ username: user.username }, 'my_secret_key', { subject: user?.uuid });
+        const jwt = JWT.sign({ username: user.username }, 'my_secret_key', { subject: user?.uuid, expiresIn: (60 * 60) * 24 }); // 60s = 1m | 1m * 60 = 1h | 1h * 24 = 24h
         res.status(StatusCodes.OK).send({ token: jwt });
     } catch(error) {
         next(error);

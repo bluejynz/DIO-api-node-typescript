@@ -11,11 +11,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(statusRoute);
-app.use(usersRoute);
+app.use(authorizationRoute);
 
 //authenticated routes
 app.use(jwtAuthenticationMiddleware);
-app.use(authorizationRoute);
+app.use(usersRoute);
 
 app.use(errorHandler);
 
