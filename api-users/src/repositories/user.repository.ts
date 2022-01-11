@@ -1,4 +1,5 @@
 import db from '../db';
+import errorHandler from '../middlewares/error-handler.middleware';
 import DatabaseError from '../models/errors/database.error.model';
 import User from '../models/user.model';
 
@@ -9,13 +10,17 @@ class UserRepository {
      * @returns array de usuários se existir algum, senão retorna vazio.
      */
     async findAllUsers() : Promise<User[]> {
-        const query = `
-            SELECT uuid, username
-            FROM application_user
-        `;
+        try {
+            const query = `
+                SELECT uuid, username
+                FROM application_user
+            `;
 
-        const { rows } = await db.query<User>(query);
-        return rows || [];
+            const { rows } = await db.query<User>(query);
+            return rows || [];
+        } catch(error) {
+            throw new DatabaseError('Erro na consulta', error);
+        }
     }
 
     /**
@@ -46,19 +51,23 @@ class UserRepository {
      * @returns uuid gerado automaticamente pelo banco de dados.
      */
     async create(user: User) : Promise<string> {
-        const query = `
-            INSERT INTO application_user (
-                username,
-                password
-            )
-            VALUES ($1, crypt($2, 'my_salt'))
-            RETURNING uuid
-        `;
+        try {
+            const query = `
+                INSERT INTO application_user (
+                    username,
+                    password
+                )
+                VALUES ($1, crypt($2, 'my_salt'))
+                RETURNING uuid
+            `;
 
-        const values = [ user.username, user.password ];
-        const { rows } = await db.query<{ uuid: string }>(query, values);
-        const [ newUser ] = rows;
-        return newUser.uuid;
+            const values = [ user.username, user.password ];
+            const { rows } = await db.query<{ uuid: string }>(query, values);
+            const [ newUser ] = rows;
+            return newUser.uuid;
+        } catch(error) {
+            throw new DatabaseError('Erro ao criar usuário', error);
+        }
     }
 
     /**
@@ -66,16 +75,20 @@ class UserRepository {
      * @param user recebe um usuário com novo nome (username) e senha (password), e um uuid para procurar usuário a ser modificado caso exista.
      */
     async update(user: User) : Promise<void> {
-        const query = `
-            UPDATE application_user
-            SET
-                username = $1,
-                password = crypt($2, 'my_salt')
-            WHERE uuid = $3
-        `;
+        try {
+            const query = `
+                UPDATE application_user
+                SET
+                    username = $1,
+                    password = crypt($2, 'my_salt')
+                WHERE uuid = $3
+            `;
 
-        const values = [ user.username, user.password, user.uuid ];
-        await db.query(query, values);
+            const values = [ user.username, user.password, user.uuid ];
+            await db.query(query, values);
+        } catch(error) {
+            throw new DatabaseError('Erro ao atualizar usuário', error);
+        }
     }
 
     /**
@@ -83,13 +96,17 @@ class UserRepository {
      * @param uuid recebe um uuid para procurar usuário a ser excluído caso exista.
      */
     async delete(uuid: string) : Promise<void> {
-        const query = `
-            DELETE FROM application_user
-            WHERE uuid = $1
-        `;
+        try {
+            const query = `
+                DELETE FROM application_user
+                WHERE uuid = $1
+            `;
 
-        const values = [ uuid ];
-        await db.query(query, values);
+            const values = [ uuid ];
+            await db.query(query, values);
+        } catch(error) {
+            throw new DatabaseError('Erro ao deletar usuário', error);
+        }
     }
 
 }
